@@ -33,11 +33,12 @@ n="0"
 while [ $n -lt 5 ]
 do
 result=$(openssl s_client -connect $eyep\:$p -$t -cipher $c < /dev/null 2>&1)
+declare "$name"="$(( $t ))_state"
 if [[ $? -eq 0 ]];then
-$t_state="PASS"
+${!name}="PASS"
 n="5"
 else
-$t_state="FAIL"
+${!name}="FAIL"
 n=$[$n+1]
 fi
 done
