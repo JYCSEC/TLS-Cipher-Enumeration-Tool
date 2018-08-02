@@ -1,6 +1,8 @@
 #!/bin/bash
 #JYC
 #
+# USE: ./ssl_enumerate <IP> <PORT> <Name of Failsafe>
+#
 
 #Give IP if not given
 if [ -z "$1" ]
@@ -62,7 +64,7 @@ do
 			fi
 			done
 		echo "$line,$state_tls1,$state_tls1_1,$state_tls1_2" >> output_$eyep":"$p.csv
-		sed -i '/'$line'/d' failsafe.csv 
+		sed -i '/'$line'/d' $3
 	done
 done < "$3"
 echo "Done"
