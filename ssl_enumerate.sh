@@ -5,44 +5,53 @@
 #Give IP if not given
 if [ -z "$1" ]
 then
-echo "Gimme IP:"
-read eyep
+	echo "Gimme IP:"
+	read eyep
 else
-eyep=$1
+	eyep=$1
 fi
 
 #Give Port if not given
 if [ -z "$2" ]
 then
-echo "Gimme port:" 
-read p
+	echo "Gimme port:" 
+	read p
 else
-p=$2
+	p=$2
 fi
 
 #Makes Outputfile and formats
-echo "cipher,TLS1,TLS1_1,TLS1_2,DTLS1,DTLS1_2" >> Output_$eyep":"$p.csv
-tlssy=("tls1" "tls1_1" "tls1_2" "dtls1" "dtls1_2")
+echo "cipher,TLS1,TLS1_1,TLS1_2" >> Output_$eyep":"$p.csv
+tlssy=("tls1" "tls1_1" "tls1_2")
 ciphers=("AES128-GCM-SHA256" "ECDHE-PSK-AES256-CBC-SHA" "AES128-SHA" "ECDHE-PSK-AES256-CBC-SHA384" "AES128-SHA256" "ECDHE-PSK-CHACHA20-POLY1305" "AES256-GCM-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "AES256-SHA" "ECDHE-RSA-AES128-SHA" "AES256-SHA256" "ECDHE-RSA-AES128-SHA256" "DHE-PSK-AES128-CBC-SHA" "ECDHE-RSA-AES256-GCM-SHA384" "DHE-PSK-AES128-CBC-SHA256" "ECDHE-RSA-AES256-SHA" "DHE-PSK-AES128-GCM-SHA256" "ECDHE-RSA-AES256-SHA384" "DHE-PSK-AES256-CBC-SHA" "ECDHE-RSA-CHACHA20-POLY1305" "DHE-PSK-AES256-CBC-SHA384" "PSK-AES128-CBC-SHA" "DHE-PSK-AES256-GCM-SHA384" "PSK-AES128-CBC-SHA256" "DHE-PSK-CHACHA20-POLY1305" "PSK-AES128-GCM-SHA256" "DHE-RSA-AES128-GCM-SHA256" "PSK-AES256-CBC-SHA" "DHE-RSA-AES128-SHA" "PSK-AES256-CBC-SHA384" "DHE-RSA-AES128-SHA256" "PSK-AES256-GCM-SHA384" "DHE-RSA-AES256-GCM-SHA384" "PSK-CHACHA20-POLY1305" "DHE-RSA-AES256-SHA" "RSA-PSK-AES128-CBC-SHA" "DHE-RSA-AES256-SHA256" "RSA-PSK-AES128-CBC-SHA256" "DHE-RSA-CHACHA20-POLY1305" "RSA-PSK-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-GCM-SHA256" "RSA-PSK-AES256-CBC-SHA" "ECDHE-ECDSA-AES128-SHA" "RSA-PSK-AES256-CBC-SHA384" "ECDHE-ECDSA-AES128-SHA256" "RSA-PSK-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-GCM-SHA384" "RSA-PSK-CHACHA20-POLY1305" "ECDHE-ECDSA-AES256-SHA" "SRP-AES-128-CBC-SHA" "ECDHE-ECDSA-AES256-SHA384" "SRP-AES-256-CBC-SHA" "ECDHE-ECDSA-CHACHA20-POLY1305" "SRP-RSA-AES-128-CBC-SHA" "ECDHE-PSK-AES128-CBC-SHA" "SRP-RSA-AES-256-CBC-SHA" "ECDHE-PSK-AES128-CBC-SHA256")
 
 for c in "${ciphers[@]}"
 do
-for t in "${tlssy[@]}"
-do
-n="0"
-while [ $n -lt 5 ]
-do
-result=$(openssl s_client -connect $eyep\:$p -$t -cipher $c < /dev/null 2>&1)
-if [[ $? -eq 0 ]];then
-state_$t="PASS"
-n="5"
-else
-state_$t="FAIL"
-n=$[$n+1]
-fi
-done
-done
-echo "$c,$state_tls1,$state_tls1_1,$state_tls1_2,$state_dtls1,$state_dtls1_1" >> Output_$eyep":"$p.csv
+echo $c
+	for t in "${tlssy[@]}"
+	do
+	n="0"
+	while [ $n -lt 5 ]
+	do
+		sleep 0.05
+		result=$(openssl s_client -connect $eyep\:$p -$t -cipher $c < /dev/null 2>&1)
+		if [[ $? -eq 0 ]]
+		then
+			te=$t
+			declare "state_$te"="PASS"
+			n="6"
+		else
+			n=$[$n+1]
+		if [ $n -eq 5 ]
+		then
+			te=$t
+			declare "state_$te"="FAIL"
+			n="6"
+		fi
+		fi
+		done
+	done
+	echo "$c,$state_tls1,$state_tls1_1,$state_tls1_2" >> Output_$eyep":"$p.csv
 done
 echo "Done"
 
