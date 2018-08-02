@@ -1,86 +1,35 @@
 #!/bin/bash
 #JYC
 #
-#
-#
-#
 
 #Prints Target IP
 echo Target IP: $1
 
-#Makes Outputfile and formats
-echo "PORT,TLS1,TLS1_1,TLS1_2,DTLS1,DTLS1_2" >> Output_$1.csv
+echo "Gimme port:" 
+read p
 
-#i="80"
-i="1"
-while [ $i -lt 65535]
+#Makes Outputfile and formats
+echo "TLS1,TLS1_1,TLS1_2,DTLS1,DTLS1_2" >> Output_$1_$p.csv
+tlssy=("tls1" "tls1_1" "tls1_2" "dtls1" "dtls1_2")
+ciphers=("AES128-GCM-SHA256" "ECDHE-PSK-AES256-CBC-SHA" "AES128-SHA" "ECDHE-PSK-AES256-CBC-SHA384" "AES128-SHA256" "ECDHE-PSK-CHACHA20-POLY1305" "AES256-GCM-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "AES256-SHA" "ECDHE-RSA-AES128-SHA" "AES256-SHA256" "ECDHE-RSA-AES128-SHA256" "DHE-PSK-AES128-CBC-SHA" "ECDHE-RSA-AES256-GCM-SHA384" "DHE-PSK-AES128-CBC-SHA256" "ECDHE-RSA-AES256-SHA" "DHE-PSK-AES128-GCM-SHA256" "ECDHE-RSA-AES256-SHA384" "DHE-PSK-AES256-CBC-SHA" "ECDHE-RSA-CHACHA20-POLY1305" "DHE-PSK-AES256-CBC-SHA384" "PSK-AES128-CBC-SHA" "DHE-PSK-AES256-GCM-SHA384" "PSK-AES128-CBC-SHA256" "DHE-PSK-CHACHA20-POLY1305" "PSK-AES128-GCM-SHA256" "DHE-RSA-AES128-GCM-SHA256" "PSK-AES256-CBC-SHA" "DHE-RSA-AES128-SHA" "PSK-AES256-CBC-SHA384" "DHE-RSA-AES128-SHA256" "PSK-AES256-GCM-SHA384" "DHE-RSA-AES256-GCM-SHA384" "PSK-CHACHA20-POLY1305" "DHE-RSA-AES256-SHA" "RSA-PSK-AES128-CBC-SHA" "DHE-RSA-AES256-SHA256" "RSA-PSK-AES128-CBC-SHA256" "DHE-RSA-CHACHA20-POLY1305" "RSA-PSK-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-GCM-SHA256" "RSA-PSK-AES256-CBC-SHA" "ECDHE-ECDSA-AES128-SHA" "RSA-PSK-AES256-CBC-SHA384" "ECDHE-ECDSA-AES128-SHA256" "RSA-PSK-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-GCM-SHA384" "RSA-PSK-CHACHA20-POLY1305" "ECDHE-ECDSA-AES256-SHA" "SRP-AES-128-CBC-SHA" "ECDHE-ECDSA-AES256-SHA384" "SRP-AES-256-CBC-SHA" "ECDHE-ECDSA-CHACHA20-POLY1305" "SRP-RSA-AES-128-CBC-SHA" "ECDHE-PSK-AES128-CBC-SHA" "SRP-RSA-AES-256-CBC-SHA" "ECDHE-PSK-AES128-CBC-SHA256")
+for t in "${tlssy[@]}"
 do
-#TLS1 Test
 n="0"
 while [ $n -lt 5]
 do
-result=$(openssl s_client -connect $1 -tls1 < /dev/null 2>&1)
+result=$(openssl s_client -connect $1":"$p -$t < /dev/null 2>&1)
 if [[ $? -eq 0 ]];then
-TLS1_state="PASS"
+$t_state="PASS"
 n="5"
 else
-TLS1_state="FAIL"
+$t_state="FAIL"
 n=$[$n+1]
 fi
 done
-#TLS1_1 Test
-n="0"
-while [ $n -lt 5]
-do
-result=$(openssl s_client -connect $1 -tls1_1 < /dev/null 2>&1)
-if [ $? -eq 0 ];then
-TLS1_1_state="PASS"
-n="5"
-else
-TLS1_1_state="FAIL"
-n=$[$n+1]
-fi
-#TLS1_2 Test
-n="0"
-while [ $n -lt 5]
-do
-result=$(openssl s_client -connect $1 -tls1_2 < /dev/null 2>&1)
-if [ $? -eq 0 ];then
-TLS1_2_state="PASS"
-n="5"
-else
-TLS1_2_state="FAIL"
-n=$[$n+1]
-fi
-#DTLS1 Test
-n="0"
-while [ $n -lt 5]
-do
-result=$(openssl s_client -connect $1 -dtls1 < /dev/null 2>&1)
-if [[ $? -eq 0 ]];then
-DTLS1_state="PASS"
-n="5"
-else
-DTLS1_state="FAIL"
-n=$[$n+1]
-fi
-#DTLS1_2 Test
-n="0"
-while [ $n -lt 5]
-do
-result=$(openssl s_client -connect $1 -dtls1_2 < /dev/null 2>&1)
-if [[ $? -eq 0 ]];then
-DTLS1_2_state="PASS"
-n="5"
-else
-DTLS1_2_state="FAIL"
-n=$[$n+1]
-fi
+done
 #Check if any passed to print
-if [ "$TLS1_state" -eq "PASS"] || [ "$TLS1_1_state" -eq "PASS"] || [ "$TLS1_2_state" -eq "PASS"] || [ "$DTLS1_state" -eq "PASS"] || [ "$DTLS1_2_state" -eq "PASS"] ||;then
-echo "$i,$TLS1_state,$TLS1_1_state,$TLS1_2_state" >> Output_$1.csv
+if [ "$tls1_state" -eq "PASS"] || [ "$tls1_1_state" -eq "PASS"] || [ "$tls1_2_state" -eq "PASS"] || [ "$dtls1_state" -eq "PASS"] || [ "$dtls1_2_state" -eq "PASS"];then
+echo "$tls1_state,$tls1_1_state,$tls1_2_state,$dtls1_state,$dtls1_1_state" >> Output_$1_$p.csv
 fi
-i=$[$i+1]
-done
 echo "Done"
 
