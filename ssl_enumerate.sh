@@ -46,17 +46,21 @@ do
 		n="0"
 		while [ $n -lt 5 ]
 		do
-			sleep 0.05
+			#sleep 0.5
 			result=$(openssl s_client -connect $eyep\:$p -$t -cipher $line < /dev/null 2>&1)
 			if [[ $? -eq 0 ]]
 			then
+				echo pass
 				te=$t
 				declare "state_$te"="PASS"
 				n="6"
 			else
+				sleep 0.05
+				echo retrying
 				n=$[$n+1]
 			if [ $n -eq 5 ]
 			then
+				echo fail
 				te=$t
 				declare "state_$te"="FAIL"
 				n="6"
@@ -71,7 +75,7 @@ echo "Done"
 else
 for c in "${ciphers[@]}"
 do
-	echo $c >> failsafe.csv
+	echo $c >> failsafe_$eyep":"$p.csv
 done
 	for c in "${ciphers[@]}"
 	do
@@ -81,17 +85,21 @@ done
 		n="0"
 		while [ $n -lt 5 ]
 		do
-			sleep 0.05
+			#sleep 0.5
 			result=$(openssl s_client -connect $eyep\:$p -$t -cipher $c < /dev/null 2>&1)
 			if [[ $? -eq 0 ]]
 			then
+				echo pass
 				te=$t
 				declare "state_$te"="PASS"
 				n="6"
 			else
+				sleep 0.05
+				echo retrying
 				n=$[$n+1]
 			if [ $n -eq 5 ]
 			then
+				echo fail
 				te=$t
 				declare "state_$te"="FAIL"
 				n="6"
@@ -100,7 +108,7 @@ done
 			done
 		done
 		echo "$c,$state_tls1,$state_tls1_1,$state_tls1_2" >> output_$eyep":"$p.csv
-		sed -i '/'$c'/d' failsafe.csv 
+		sed -i '/'$c'/d' failsafe_$eyep":"$p.csv 
 	done
 echo "Done"
 fi
